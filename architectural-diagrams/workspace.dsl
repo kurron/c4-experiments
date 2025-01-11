@@ -24,38 +24,67 @@ workspace "Can C4 Handle Large Diagrams" {
 
     model {
         group "Business Unit Alpha" {
-            softwareSystem "Xray" {
+            xray = softwareSystem "Xray" {
                 description "Some system"
-                perspectives {
+            }
+            whiskey = softwareSystem "Whiskey" {
+                description "Microservice modeled as a software system"
+                picon = container "Picon Service" {
+                    description "Picon business logic"
+                    technology "Spring Boot"
+                }
+                geminon = container "Geminon Service" {
+                    description "Geminon business logic"
+                    technology "Spring Boot"
+                }
+                container "Baltar Service" {
+                    description "Baltar business logic"
+                    technology "AWS Lambda"
                 }
             }
-            softwareSystem "Whiskey" {
-                description "Some system"
-                perspectives {
+            softwareSystem "Shared Database Schema" {
+                description "Possible anti-pattern"
+                orderPlacementService = container "Alpha schema" {
+                    description "Alpha tables"
+                    technology "PostgreSQL"
+                    component "Inventory" {
+                        description "inventory"
+                        technology "table"
+                        picon -> this "modify product pricing data" "Spring Data JDBC" "sync-one-way" {
+                        }
+                    }
+                    component "Customer" {
+                        description "customer"
+                        technology "table"
+                        whiskey -> this "modify customer data" "Spring Data JDBC" "sync-one-way" {
+                        }
+                    }
+                    component "Points" {
+                        description "loyalty_points"
+                        technology "materialized view"
+                        xray -> this "load loyalty data" "Spring Data JDBC" "sync-one-way" {
+                        }
+                    }
                 }
             }
         }
         group "Business Unit Bravo" {
-            softwareSystem "Yankee" {
-                description "Some system"
-                perspectives {
-                }
+            yankee = softwareSystem "Yankee" {
+                description "Microservice"
             }
-            softwareSystem "Victor" {
-                description "Some system"
-                perspectives {
-                }
+            victor = softwareSystem "Victor" {
+                description "Microservice"
             }
         }
         group "Business Unit Charlie" {
             softwareSystem "Zulu" {
-                description "Some system"
-                perspectives {
+                description "Owned by another team"
+                victor -> this "access Victor functionality" "JSON over HTTP" "sync-one-way" {
                 }
             }
-            softwareSystem "Uniform" {
-                description "Some system"
-                perspectives {
+            uniform = softwareSystem "Uniform" {
+                description "Owned by another team"
+                yankee -> this "access Yankee functionality" "JSON over HTTP" "sync-one-way" {
                 }
             }
         }
@@ -63,7 +92,8 @@ workspace "Can C4 Handle Large Diagrams" {
 
     # https://visme.co/blog/website-color-schemes/
     views {
-        theme default
+        #theme default
+        theme https://static.structurizr.com/themes/microsoft-azure-2021.01.26/theme.json
         styles {
             element "MessageBroker" {
                 shape Cylinder
