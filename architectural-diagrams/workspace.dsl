@@ -12,7 +12,7 @@ multi line
 # single line
 // single line
 
-workspace "Software Architecture: The Hard Parts (Epic Saga)" "Epic Saga" {
+workspace "Can C4 Handle Large Diagrams" {
     !identifiers flat
     !impliedRelationships true
    #!include <file|directory|url>
@@ -23,180 +23,42 @@ workspace "Software Architecture: The Hard Parts (Epic Saga)" "Epic Saga" {
     !const FOO "Some text you want to reuse."
 
     model {
-        penny = Person "Penny" {
-            description "Purchasing customer"
+        group "Business Unit Alpha" {
+            softwareSystem "Xray" {
+                description "Some system"
+                perspectives {
+                }
+            }
+            softwareSystem "Whiskey" {
+                description "Some system"
+                perspectives {
+                }
+            }
         }
-        softwareSystem "Buy Less" {
-            description "Another system"
+        group "Business Unit Bravo" {
+            softwareSystem "Yankee" {
+                description "Some system"
+                perspectives {
+                }
+            }
+            softwareSystem "Victor" {
+                description "Some system"
+                perspectives {
+                }
+            }
         }
-        buymore = softwareSystem "Buy More" {
-            description "Online Buy More storefront"
-            perspectives {
-            }
-            orderPlacementService = container "Order Placement Service" {
-                description "Accepts orders"
-                technology "Spring Ecosystem"
-                tags "tag"
+        group "Business Unit Charlie" {
+            softwareSystem "Zulu" {
+                description "Some system"
                 perspectives {
                 }
-                orderPlacementAPI = component "Order Placement API" {
-                    description "Service API"
-                    technology "Spring HATEOAS"
-                    perspectives {
-                    }
-                }
-                orderPlacementSchema = component "Order Placement Schema" {
-                    description "Order state"
-                    technology "PostgreSQL"
-                    perspectives {
-                    }
-                }
-                component "Order Placement Persistence" {
-                    description "Persist Service State"
-                    technology "Spring Data JDBC"
-                    perspectives {
-                    }
-                    orderPlacementAPI -> this "order data" "Spring Data JDBC" "sync-one-way" {
-                    }
-                    this -> orderPlacementSchema "order data" "Spring Data JDBC" "sync-one-way" {
-                    }
-                }
             }
-            paymentService = container "Payment Service" {
-                description "Process payments"
-                technology "Spring Ecosystem"
-                tags "tag"
+            softwareSystem "Uniform" {
+                description "Some system"
                 perspectives {
                 }
-                paymentAPI = component "Payment API" {
-                    description "Service API"
-                    technology "Spring HATEOAS"
-                    perspectives {
-                    }
-                }
-                paymentSchema = component "Payment Schema" {
-                    description "Payment state"
-                    technology "PostgreSQL"
-                    perspectives {
-                    }
-                }
-                component "Payment Persistence" {
-                    description "Persist Service State"
-                    technology "Spring Data JDBC"
-                    perspectives {
-                    }
-                    paymentAPI -> this "payment data" "Spring Data JDBC" "sync-one-way" {
-                    }
-                    this -> paymentSchema "payment data" "Spring Data JDBC" "sync-one-way" {
-                    }
-                }
             }
-            fulfillmentService = container "Fulfillment Service" {
-                description "Ships orders"
-                technology "Spring Ecosystem"
-                tags "tag"
-                perspectives {
-                }
-                fulfillmentAPI = component "Fulfillment API" {
-                    description "Service API"
-                    technology "Spring HATEOAS"
-                    perspectives {
-                    }
-                }
-                fulfillmentSchema = component "Fulfillment Schema" {
-                    description "Fulfillment state"
-                    technology "PostgreSQL"
-                    perspectives {
-                    }
-                }
-                component "Fulfillment Persistence" {
-                    description "Persist Service State"
-                    technology "Spring Data JDBC"
-                    perspectives {
-                    }
-                    fulfillmentAPI -> this "fulfillment data" "Spring Data JDBC" "sync-one-way" {
-                    }
-                    this -> fulfillmentSchema "fulfillment data" "Spring Data JDBC" "sync-one-way" {
-                    }
-                }
-            }
-            emailService = container "E-mail Service" {
-                description "E-mail customers"
-                technology "Spring Ecosystem"
-                tags "tag"
-                perspectives {
-                }
-                emailAPI = component "E-Mail API" {
-                    description "Service API"
-                    technology "Spring HATEOAS"
-                    perspectives {
-                    }
-                }
-                emailSchema = component "E-mail Schema" {
-                    description "E-mail state"
-                    technology "PostgreSQL"
-                    perspectives {
-                    }
-                }
-                component "E-Mail Persistence" {
-                    description "Persist Service State"
-                    technology "Spring Data JDBC"
-                    perspectives {
-                    }
-                    emailAPI -> this "e-mail data" "Spring Data JDBC" "sync-one-way" {
-                    }
-                    this -> emailSchema "e-mail data" "Spring Data JDBC" "sync-one-way" {
-                    }
-                }
-            }
-            orchestrator = container "Orchestrator" {
-                description "Coordinates the workflow, maintains atomic consistency"
-                technology "Spring Ecosystem"
-                tags "tag"
-                perspectives {
-                }
-                orchestratorAPI = component "Orchestrator API" {
-                    description "Service API"
-                    technology "Spring HATEOAS"
-                    perspectives {
-                    }
-                    penny -> this "purchase products" "JSON over HTTPS" "sync-one-way" {
-                    }
-                }
-                serviceGateway = component "Service Gateway" {
-                    description "Service Clients"
-                    technology "Spring HATEOAS"
-                    perspectives {
-                    }
-                    orchestratorAPI -> this "execute workflow" "JSON over HTTPS" "sync-one-way" {
-                    }
-                    this -> orderPlacementAPI "accept the order" "JSON over HTTPS" "sync-one-way" {
-                    }
-                    this -> paymentAPI "process the payment" "JSON over HTTPS" "sync-one-way" {
-                    }
-                    this -> fulfillmentAPI "ship the order" "JSON over HTTPS" "sync-one-way" {
-                    }
-                    this -> emailAPI "send the order status" "JSON over HTTPS" "sync-one-way" {
-                    }
-                }
-                orchestrationSchema = component "Orchestration Schema" {
-                    description "Orchestration state"
-                    technology "PostgreSQL"
-                    perspectives {
-                    }
-                }
-                component "Orchestrator Persistence" {
-                    description "Persist Service State"
-                    technology "Spring Data JDBC"
-                    perspectives {
-                    }
-                    orchestratorAPI -> this "execute workflow" "JSON over HTTPS" "sync-one-way" {
-                    }
-                    this -> orchestrationSchema "orchestration data" "Spring Data JDBC" "sync-one-way" {
-                    }
-                }
-            }
-       }
+        }
     }
 
     # https://visme.co/blog/website-color-schemes/

@@ -1,45 +1,45 @@
 {
   "configuration" : { },
-  "description" : "Epic Saga",
+  "description" : "Description",
   "documentation" : {
     "decisions" : [ {
       "content" : "# 1. Record architecture decisions\n\n## Status\nAccepted\n\n## Context\nWe will record the architectural decisions made on this project.\n\n## Decision\nWe will use Architecture Decision Records, as described by Michael Nygard in this article: [Documenting Architecture Decisions](http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions)\n\n## Consequences\nSee Michael Nygard's article, linked above.\n\n## Compliance\nBeing a learning project, no effort will be made to enforce the use of decision records.\n\n## Notes\n\n",
-      "date" : "2025-01-06T22:24:54Z",
+      "date" : "2025-01-11T16:53:33Z",
       "format" : "Markdown",
       "id" : "1",
       "status" : "Accepted",
       "title" : "Record architecture decisions"
     }, {
       "content" : "# 1. Microservices Architecture\n\n## Status\nAccepted\n\n## Context\nIn order to showcase the Epic Saga pattern, we need to provide atomic database consistency of the system.\n\n## Decision\nWe will use a Microservices architectural style to implement the distributed services. The simplest style to achieve atomic consistency would to use a monolithic style, such as a Layered Monolith, but the idea is to experience the trade-offs when using the saga in a distributed architecture. A Service-Oriented architecture was also considered, due to the sharing of a database, but that didn't provide any benefits and introduced potential unwanted coupling at the persistence level. \n\n## Consequences\nEach distributed service will connect to the same database but will use their own schema, keeping the database namespace nice and tidy. Since each domain is implemented in its own process, the Orchestrator will have to issue compensating transactions when dealing with service failures. Fault handling is the most difficult part of this saga type and should provide an excellent learning experience. \n\n## Compliance\nBeing a learning project, no effort will be made to enforce the use of decision records.\n\n## Notes\n",
-      "date" : "2025-01-06T22:24:54Z",
+      "date" : "2025-01-11T16:53:33Z",
       "format" : "Markdown",
       "id" : "2",
       "status" : "Accepted",
       "title" : "Microservices Architecture"
     }, {
       "content" : "# 1. Use Kotlin For Production Code\n\n## Status\nAccepted\n\n## Context\nModern Java has improved the programmer experience but Kotlin, in our opinion, provides a better one.\n\n## Decision\nWe will use [Kotlin](https://kotlinlang.org/) to develop the production modules. Test will use Java, primarily due to some complexity in getting Cucumber and Kotlin to play nicely together.\n\n## Consequences\nKotlin has many features baked into the language that require extra libraries to accomplish in Java, e.g. Lombok. Fewer dependencies means fewer upgrade headaches in the future.\n\n## Compliance\nBeing a learning project, no effort will be made to enforce the use of decision records.\n\n## Notes\n",
-      "date" : "2025-01-06T22:24:54Z",
+      "date" : "2025-01-11T16:53:33Z",
       "format" : "Markdown",
       "id" : "3",
       "status" : "Accepted",
       "title" : "Use Kotlin For Production Code"
     }, {
       "content" : "# 1. Use Explicit Contexts\n\n## Status\nAccepted\n\n## Context\nMichael Nygard has a very interesting idea that should allow system to evolve over time. From his book [Release It!]():\n\n>Suppose your service receives this fragment of JSON inside a request: `{\"item\": \"029292934\"}`\n>\n>How much do we know about the item? Is that string the item itself? Or is it an item identifier? Maybe the field would be better named “itemID.” Supposing that it is an identifier, our service can’t do very much with it. In fact, only four things are possible:\n>\n>1. Pass it through as a token to other services. (This includes returning it to the same caller in the future.)\n>2. Look it up by calling another service.\n>3. Look it up in our own database.\n>4. Discard it.\n>\n>In the first case, we’re just using the “itemID” as a token. We don’t care about the internal structure. In this case it would be a mistake to convert it from string to numeric. We’d be imposing a restriction that doesn’t add any value and will probably need to be changed—with huge disruption—in the future.\n>\n>In the second and third cases, we’re using the “itemID” as something we can resolve to get more information. But there’s a serious problem here. The bare string shown earlier doesn’t tell us who has the authoritative information. If the answer isn’t in our own database, we need to call another service. Which service?\n>\n>This issue is so pervasive that it does not even look like a problem at first. In order to get item information, your service must already know who to call! That’s an implicit dependency.\n>\n>That implicit dependency limits you to working with just the one service provider. If you need to support items from two different “universes,” it’s going to be very disruptive.\n>\n>Suppose instead the initial fragment of JSON looked like this: `{\"itemID\": \"https://example.com/policies/029292934\"}`\n>\n>This URL still works if we just want to use it as an opaque token to pass forward. From one perspective, it’s still just a Unicode string.\n>\n>This URL also still works if we need to resolve it to get more information. But now our service does not have to bake in knowledge of the solitary authority. We can support more than one of them.\n>\n>By the way, using a full URL also makes integration testing easier. We no longer need “test” versions of the other services. We can supply our own test harnesses and use URLs to those instead of the production authorities.\n>\n>This example is all in the context of interservice communication. But making implicit context into explicit context has big benefits inside services as well. If you’ve worked on a Ruby on Rails system, you might have run into difficulty when trying to use multiple relational databases from a single service. That’s because ActiveRecord uses an implicit database connection. This is convenient when there’s just one database, but it becomes a hindrance when you need more than one.\n>\n>Global state is the most insidious form of implicit context. That include configuration parameters. These will slow you down when you need to go from “one” to “more than one” of a collaboration.\n\n## Decision\nWhen possible, we will use a URI as the primary key for objects. Depending on the system in question, it may not be an easily resolvable location and may have to be deconstructed a bit before getting to something readable. For example: `mongodb:read-only-user@mongodb.example.com:5762/some-dataset?_id=9876` probably won't have an available protocol handler, so one must be written.  \n\n## Consequences\nIf we can use stable names for the authority portion of the URI, we should be able to move services around and still have systems find the data they need. One element we have to be keenly aware of is that changing the scheme portion later will be very difficult, if not impossible. If available, an HTTP or GraphQL URI should be preferred over direct database or coordinates. In practical terms, this means that we still use database generated primary keys but return a URL as the ID of the asset.  For example, document `1234` would be exposed to the caller as `http://alpha.test.example.com/user/1234`. If that URI is ever \"tugged\" on, hyperlinks are provided to other possible operations on the resource.\n\n## Compliance\nBeing a learning project, no effort will be made to enforce the use of decision records.\n\n## Notes\n",
-      "date" : "2025-01-06T22:24:54Z",
+      "date" : "2025-01-11T16:53:33Z",
       "format" : "Markdown",
       "id" : "4",
       "status" : "Accepted",
       "title" : "Use Explicit Contexts"
     }, {
       "content" : "# 1. Use Mark Richards' \"arrow\" Notation\n\n## Status\nAccepted\n\n## Context\nLooking at a static diagram, especially when printed on a black and white printer, it can be difficult to quickly grasp how each component interacts with others. In particular, the use of arrows and lines are often ambiguous and/or misleading, decreasing the understandability of the diagram.\n\n## Decision\n[Mark Richards](https://developertoarchitect.com/lessons/) has a simple set of conventions when it comes to lines and arrows that we will incorporate into our C4 views: [Lesson 94 - Guidelines for Architecture Diagrams](https://developertoarchitect.com/lessons/lesson94.html) and [Lesson 95 - Guidelines for Architecture Diagrams Revisited](https://developertoarchitect.com/lessons/lesson95.html).\n\n## Consequences\nBy taking using a simple convention when it comes to line and arrow use, people should more quickly understand what is being diagrammed with less ambiguity.\n\n## Compliance\nBeing a learning project, no effort will be made to enforce the use of decision records.\n\n## Notes\n",
-      "date" : "2025-01-06T22:24:54Z",
+      "date" : "2025-01-11T16:53:33Z",
       "format" : "Markdown",
       "id" : "5",
       "status" : "Accepted",
       "title" : "Use Mark Richards' \"arrow\" Notation"
     }, {
       "content" : "# 1. Use Request State Management to simulate the Isolated portion of ACID\n\n## Status\nAccepted\n\n## Context\nThe Epic Saga requires that we provide atomic consistency across our distributed transaction. Not an easy feat to accomplish.\n\n## Decision\nIn [Lesson 176 - Compensating Updates Revisited](https://youtu.be/_lZ7JJVNKcc?si=bXe7J52YtHakjFND), Mark Richards provides an alternative to using compensating operations to keep the system in a consistent state.\n\n## Consequences\nEach service will be required to use [Apache Ignite](https://ignite.apache.org/), probably behind Spring Boot's cache abstraction, to keep the current state of the in-flight operation's state current. This does a couple things, including allowing the workflow to resume from a failed step if some self-healing has occurred.\n\n## Compliance\nBeing a learning project, no effort will be made to enforce the use of decision records.\n\n## Notes\n",
-      "date" : "2025-01-06T22:24:54Z",
+      "date" : "2025-01-11T16:53:33Z",
       "format" : "Markdown",
       "id" : "6",
       "status" : "Accepted",
@@ -132,713 +132,86 @@
     } ]
   },
   "id" : 1,
-  "lastModifiedDate" : "2025-01-06T22:24:54Z",
+  "lastModifiedAgent" : "structurizr-ui",
+  "lastModifiedDate" : "2025-01-11T16:53:48Z",
   "model" : {
-    "people" : [ {
-      "description" : "Purchasing customer",
+    "softwareSystems" : [ {
+      "description" : "Some system",
+      "documentation" : { },
+      "group" : "Business Unit Alpha",
       "id" : "1",
       "location" : "Unspecified",
-      "name" : "Penny",
+      "name" : "Xray",
       "properties" : {
-        "structurizr.dsl.identifier" : "penny"
-      },
-      "relationships" : [ {
-        "description" : "purchase products",
-        "destinationId" : "29",
-        "id" : "30",
-        "sourceId" : "1",
-        "tags" : "Relationship,sync-one-way",
-        "technology" : "JSON over HTTPS"
-      }, {
-        "description" : "purchase products",
-        "destinationId" : "28",
-        "id" : "31",
-        "linkedRelationshipId" : "30",
-        "sourceId" : "1",
-        "technology" : "JSON over HTTPS"
-      }, {
-        "description" : "purchase products",
-        "destinationId" : "3",
-        "id" : "32",
-        "linkedRelationshipId" : "30",
-        "sourceId" : "1",
-        "technology" : "JSON over HTTPS"
-      } ],
-      "tags" : "Element,Person"
-    } ],
-    "softwareSystems" : [ {
-      "description" : "Another system",
-      "documentation" : { },
-      "id" : "2",
-      "location" : "Unspecified",
-      "name" : "Buy Less",
-      "properties" : {
-        "structurizr.dsl.identifier" : "c5e42e65-0193-4985-94f9-e07ec9e75919"
+        "structurizr.dsl.identifier" : "bb78cb63-ef5c-4b80-8f1c-50af6a78abad"
       },
       "tags" : "Element,Software System"
     }, {
-      "containers" : [ {
-        "components" : [ {
-          "description" : "Service API",
-          "documentation" : { },
-          "id" : "5",
-          "name" : "Order Placement API",
-          "properties" : {
-            "structurizr.dsl.identifier" : "orderplacementapi"
-          },
-          "relationships" : [ {
-            "description" : "order data",
-            "destinationId" : "7",
-            "id" : "8",
-            "sourceId" : "5",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "Spring Data JDBC"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring HATEOAS"
-        }, {
-          "description" : "Order state",
-          "documentation" : { },
-          "id" : "6",
-          "name" : "Order Placement Schema",
-          "properties" : {
-            "structurizr.dsl.identifier" : "orderplacementschema"
-          },
-          "tags" : "Element,Component",
-          "technology" : "PostgreSQL"
-        }, {
-          "description" : "Persist Service State",
-          "documentation" : { },
-          "id" : "7",
-          "name" : "Order Placement Persistence",
-          "properties" : {
-            "structurizr.dsl.identifier" : "07355059-fa74-43db-baf6-35a7b847df07"
-          },
-          "relationships" : [ {
-            "description" : "order data",
-            "destinationId" : "6",
-            "id" : "9",
-            "sourceId" : "7",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "Spring Data JDBC"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring Data JDBC"
-        } ],
-        "description" : "Accepts orders",
-        "documentation" : { },
-        "id" : "4",
-        "name" : "Order Placement Service",
-        "properties" : {
-          "structurizr.dsl.identifier" : "orderplacementservice"
-        },
-        "tags" : "Element,Container,tag",
-        "technology" : "Spring Ecosystem"
-      }, {
-        "components" : [ {
-          "description" : "Service API",
-          "documentation" : { },
-          "id" : "11",
-          "name" : "Payment API",
-          "properties" : {
-            "structurizr.dsl.identifier" : "paymentapi"
-          },
-          "relationships" : [ {
-            "description" : "payment data",
-            "destinationId" : "13",
-            "id" : "14",
-            "sourceId" : "11",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "Spring Data JDBC"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring HATEOAS"
-        }, {
-          "description" : "Payment state",
-          "documentation" : { },
-          "id" : "12",
-          "name" : "Payment Schema",
-          "properties" : {
-            "structurizr.dsl.identifier" : "paymentschema"
-          },
-          "tags" : "Element,Component",
-          "technology" : "PostgreSQL"
-        }, {
-          "description" : "Persist Service State",
-          "documentation" : { },
-          "id" : "13",
-          "name" : "Payment Persistence",
-          "properties" : {
-            "structurizr.dsl.identifier" : "400218ab-a482-47bd-a235-aa087e35d162"
-          },
-          "relationships" : [ {
-            "description" : "payment data",
-            "destinationId" : "12",
-            "id" : "15",
-            "sourceId" : "13",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "Spring Data JDBC"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring Data JDBC"
-        } ],
-        "description" : "Process payments",
-        "documentation" : { },
-        "id" : "10",
-        "name" : "Payment Service",
-        "properties" : {
-          "structurizr.dsl.identifier" : "paymentservice"
-        },
-        "tags" : "Element,Container,tag",
-        "technology" : "Spring Ecosystem"
-      }, {
-        "components" : [ {
-          "description" : "Service API",
-          "documentation" : { },
-          "id" : "17",
-          "name" : "Fulfillment API",
-          "properties" : {
-            "structurizr.dsl.identifier" : "fulfillmentapi"
-          },
-          "relationships" : [ {
-            "description" : "fulfillment data",
-            "destinationId" : "19",
-            "id" : "20",
-            "sourceId" : "17",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "Spring Data JDBC"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring HATEOAS"
-        }, {
-          "description" : "Fulfillment state",
-          "documentation" : { },
-          "id" : "18",
-          "name" : "Fulfillment Schema",
-          "properties" : {
-            "structurizr.dsl.identifier" : "fulfillmentschema"
-          },
-          "tags" : "Element,Component",
-          "technology" : "PostgreSQL"
-        }, {
-          "description" : "Persist Service State",
-          "documentation" : { },
-          "id" : "19",
-          "name" : "Fulfillment Persistence",
-          "properties" : {
-            "structurizr.dsl.identifier" : "bc44ae1a-59f3-4682-b598-81e9e711a1f0"
-          },
-          "relationships" : [ {
-            "description" : "fulfillment data",
-            "destinationId" : "18",
-            "id" : "21",
-            "sourceId" : "19",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "Spring Data JDBC"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring Data JDBC"
-        } ],
-        "description" : "Ships orders",
-        "documentation" : { },
-        "id" : "16",
-        "name" : "Fulfillment Service",
-        "properties" : {
-          "structurizr.dsl.identifier" : "fulfillmentservice"
-        },
-        "tags" : "Element,Container,tag",
-        "technology" : "Spring Ecosystem"
-      }, {
-        "components" : [ {
-          "description" : "Service API",
-          "documentation" : { },
-          "id" : "23",
-          "name" : "E-Mail API",
-          "properties" : {
-            "structurizr.dsl.identifier" : "emailapi"
-          },
-          "relationships" : [ {
-            "description" : "e-mail data",
-            "destinationId" : "25",
-            "id" : "26",
-            "sourceId" : "23",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "Spring Data JDBC"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring HATEOAS"
-        }, {
-          "description" : "E-mail state",
-          "documentation" : { },
-          "id" : "24",
-          "name" : "E-mail Schema",
-          "properties" : {
-            "structurizr.dsl.identifier" : "emailschema"
-          },
-          "tags" : "Element,Component",
-          "technology" : "PostgreSQL"
-        }, {
-          "description" : "Persist Service State",
-          "documentation" : { },
-          "id" : "25",
-          "name" : "E-Mail Persistence",
-          "properties" : {
-            "structurizr.dsl.identifier" : "43a6c2ee-97df-4b8d-92ea-e3371e763a05"
-          },
-          "relationships" : [ {
-            "description" : "e-mail data",
-            "destinationId" : "24",
-            "id" : "27",
-            "sourceId" : "25",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "Spring Data JDBC"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring Data JDBC"
-        } ],
-        "description" : "E-mail customers",
-        "documentation" : { },
-        "id" : "22",
-        "name" : "E-mail Service",
-        "properties" : {
-          "structurizr.dsl.identifier" : "emailservice"
-        },
-        "tags" : "Element,Container,tag",
-        "technology" : "Spring Ecosystem"
-      }, {
-        "components" : [ {
-          "description" : "Service API",
-          "documentation" : { },
-          "id" : "29",
-          "name" : "Orchestrator API",
-          "properties" : {
-            "structurizr.dsl.identifier" : "orchestratorapi"
-          },
-          "relationships" : [ {
-            "description" : "execute workflow",
-            "destinationId" : "33",
-            "id" : "34",
-            "sourceId" : "29",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "JSON over HTTPS"
-          }, {
-            "description" : "execute workflow",
-            "destinationId" : "52",
-            "id" : "53",
-            "sourceId" : "29",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "JSON over HTTPS"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring HATEOAS"
-        }, {
-          "description" : "Service Clients",
-          "documentation" : { },
-          "id" : "33",
-          "name" : "Service Gateway",
-          "properties" : {
-            "structurizr.dsl.identifier" : "servicegateway"
-          },
-          "relationships" : [ {
-            "description" : "accept the order",
-            "destinationId" : "5",
-            "id" : "35",
-            "sourceId" : "33",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "JSON over HTTPS"
-          }, {
-            "description" : "accept the order",
-            "destinationId" : "4",
-            "id" : "36",
-            "linkedRelationshipId" : "35",
-            "sourceId" : "33",
-            "technology" : "JSON over HTTPS"
-          }, {
-            "description" : "process the payment",
-            "destinationId" : "11",
-            "id" : "39",
-            "sourceId" : "33",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "JSON over HTTPS"
-          }, {
-            "description" : "process the payment",
-            "destinationId" : "10",
-            "id" : "40",
-            "linkedRelationshipId" : "39",
-            "sourceId" : "33",
-            "technology" : "JSON over HTTPS"
-          }, {
-            "description" : "ship the order",
-            "destinationId" : "17",
-            "id" : "43",
-            "sourceId" : "33",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "JSON over HTTPS"
-          }, {
-            "description" : "ship the order",
-            "destinationId" : "16",
-            "id" : "44",
-            "linkedRelationshipId" : "43",
-            "sourceId" : "33",
-            "technology" : "JSON over HTTPS"
-          }, {
-            "description" : "send the order status",
-            "destinationId" : "23",
-            "id" : "47",
-            "sourceId" : "33",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "JSON over HTTPS"
-          }, {
-            "description" : "send the order status",
-            "destinationId" : "22",
-            "id" : "48",
-            "linkedRelationshipId" : "47",
-            "sourceId" : "33",
-            "technology" : "JSON over HTTPS"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring HATEOAS"
-        }, {
-          "description" : "Orchestration state",
-          "documentation" : { },
-          "id" : "51",
-          "name" : "Orchestration Schema",
-          "properties" : {
-            "structurizr.dsl.identifier" : "orchestrationschema"
-          },
-          "tags" : "Element,Component",
-          "technology" : "PostgreSQL"
-        }, {
-          "description" : "Persist Service State",
-          "documentation" : { },
-          "id" : "52",
-          "name" : "Orchestrator Persistence",
-          "properties" : {
-            "structurizr.dsl.identifier" : "3b008c23-f657-4b5c-8c7b-f88ef7ff4335"
-          },
-          "relationships" : [ {
-            "description" : "orchestration data",
-            "destinationId" : "51",
-            "id" : "54",
-            "sourceId" : "52",
-            "tags" : "Relationship,sync-one-way",
-            "technology" : "Spring Data JDBC"
-          } ],
-          "tags" : "Element,Component",
-          "technology" : "Spring Data JDBC"
-        } ],
-        "description" : "Coordinates the workflow, maintains atomic consistency",
-        "documentation" : { },
-        "id" : "28",
-        "name" : "Orchestrator",
-        "properties" : {
-          "structurizr.dsl.identifier" : "orchestrator"
-        },
-        "relationships" : [ {
-          "description" : "accept the order",
-          "destinationId" : "5",
-          "id" : "37",
-          "linkedRelationshipId" : "35",
-          "sourceId" : "28",
-          "technology" : "JSON over HTTPS"
-        }, {
-          "description" : "accept the order",
-          "destinationId" : "4",
-          "id" : "38",
-          "linkedRelationshipId" : "35",
-          "sourceId" : "28",
-          "technology" : "JSON over HTTPS"
-        }, {
-          "description" : "process the payment",
-          "destinationId" : "11",
-          "id" : "41",
-          "linkedRelationshipId" : "39",
-          "sourceId" : "28",
-          "technology" : "JSON over HTTPS"
-        }, {
-          "description" : "process the payment",
-          "destinationId" : "10",
-          "id" : "42",
-          "linkedRelationshipId" : "39",
-          "sourceId" : "28",
-          "technology" : "JSON over HTTPS"
-        }, {
-          "description" : "ship the order",
-          "destinationId" : "17",
-          "id" : "45",
-          "linkedRelationshipId" : "43",
-          "sourceId" : "28",
-          "technology" : "JSON over HTTPS"
-        }, {
-          "description" : "ship the order",
-          "destinationId" : "16",
-          "id" : "46",
-          "linkedRelationshipId" : "43",
-          "sourceId" : "28",
-          "technology" : "JSON over HTTPS"
-        }, {
-          "description" : "send the order status",
-          "destinationId" : "23",
-          "id" : "49",
-          "linkedRelationshipId" : "47",
-          "sourceId" : "28",
-          "technology" : "JSON over HTTPS"
-        }, {
-          "description" : "send the order status",
-          "destinationId" : "22",
-          "id" : "50",
-          "linkedRelationshipId" : "47",
-          "sourceId" : "28",
-          "technology" : "JSON over HTTPS"
-        } ],
-        "tags" : "Element,Container,tag",
-        "technology" : "Spring Ecosystem"
-      } ],
-      "description" : "Online Buy More storefront",
+      "description" : "Some system",
       "documentation" : { },
+      "group" : "Business Unit Alpha",
+      "id" : "2",
+      "location" : "Unspecified",
+      "name" : "Whiskey",
+      "properties" : {
+        "structurizr.dsl.identifier" : "ebd1124d-a459-489f-a68a-4c53953c8deb"
+      },
+      "tags" : "Element,Software System"
+    }, {
+      "description" : "Some system",
+      "documentation" : { },
+      "group" : "Business Unit Bravo",
       "id" : "3",
       "location" : "Unspecified",
-      "name" : "Buy More",
+      "name" : "Yankee",
       "properties" : {
-        "structurizr.dsl.identifier" : "buymore"
+        "structurizr.dsl.identifier" : "cb894ade-387e-4c42-ad0f-98144328fc7e"
+      },
+      "tags" : "Element,Software System"
+    }, {
+      "description" : "Some system",
+      "documentation" : { },
+      "group" : "Business Unit Bravo",
+      "id" : "4",
+      "location" : "Unspecified",
+      "name" : "Victor",
+      "properties" : {
+        "structurizr.dsl.identifier" : "423cf1cd-81b8-443b-9ebf-8f9bde0a121a"
+      },
+      "tags" : "Element,Software System"
+    }, {
+      "description" : "Some system",
+      "documentation" : { },
+      "group" : "Business Unit Charlie",
+      "id" : "5",
+      "location" : "Unspecified",
+      "name" : "Zulu",
+      "properties" : {
+        "structurizr.dsl.identifier" : "1fb72c48-bdf0-442e-b347-98d6a6ca6c7f"
+      },
+      "tags" : "Element,Software System"
+    }, {
+      "description" : "Some system",
+      "documentation" : { },
+      "group" : "Business Unit Charlie",
+      "id" : "6",
+      "location" : "Unspecified",
+      "name" : "Uniform",
+      "properties" : {
+        "structurizr.dsl.identifier" : "a3148bfa-3b5a-4fd6-aabd-f2c5b58fd128"
       },
       "tags" : "Element,Software System"
     } ]
   },
-  "name" : "Software Architecture: The Hard Parts (Epic Saga)",
+  "name" : "Can C4 Handle Large Diagrams",
   "properties" : {
-    "structurizr.dsl" : "IyBodHRwczovL2dpdGh1Yi5jb20vc3RydWN0dXJpenIvZHNsL2Jsb2IvbWFzdGVyL2RvY3MvbGFuZ3VhZ2UtcmVmZXJlbmNlLm1kCgojKFBlcnNvbnxTb2Z0d2FyZVN5c3RlbXxDb250YWluZXJ8Q29tcG9uZW50fERlcGxveW1lbnROb2RlfEluZnJhc3RydWN0dXJlTm9kZXxTb2Z0d2FyZVN5c3RlbUluc3RhbmNlfENvbnRhaW5lckluc3RhbmNlfEN1c3RvbSkKCiFjb25zdCBDT0RFX05BTUUgIlByb2plY3QgQWxwaGEiCiFjb25zdCBHUk9VUF9OQU1FICJHcm91cCIKCi8qCm11bHRpIGxpbmUKKi8KCiMgc2luZ2xlIGxpbmUKLy8gc2luZ2xlIGxpbmUKCndvcmtzcGFjZSAiU29mdHdhcmUgQXJjaGl0ZWN0dXJlOiBUaGUgSGFyZCBQYXJ0cyAoRXBpYyBTYWdhKSIgIkVwaWMgU2FnYSIgewogICAgIWlkZW50aWZpZXJzIGZsYXQKICAgICFpbXBsaWVkUmVsYXRpb25zaGlwcyB0cnVlCiAgICMhaW5jbHVkZSA8ZmlsZXxkaXJlY3Rvcnl8dXJsPgoKICAgICFkb2NzIGRvY3VtZW50cwogICAgIWFkcnMgZGVjaXNpb25zCgogICAgIWNvbnN0IEZPTyAiU29tZSB0ZXh0IHlvdSB3YW50IHRvIHJldXNlLiIKCiAgICBtb2RlbCB7CiAgICAgICAgcGVubnkgPSBQZXJzb24gIlBlbm55IiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJQdXJjaGFzaW5nIGN1c3RvbWVyIgogICAgICAgIH0KICAgICAgICBzb2Z0d2FyZVN5c3RlbSAiQnV5IExlc3MiIHsKICAgICAgICAgICAgZGVzY3JpcHRpb24gIkFub3RoZXIgc3lzdGVtIgogICAgICAgIH0KICAgICAgICBidXltb3JlID0gc29mdHdhcmVTeXN0ZW0gIkJ1eSBNb3JlIiB7CiAgICAgICAgICAgIGRlc2NyaXB0aW9uICJPbmxpbmUgQnV5IE1vcmUgc3RvcmVmcm9udCIKICAgICAgICAgICAgcGVyc3BlY3RpdmVzIHsKICAgICAgICAgICAgfQogICAgICAgICAgICBvcmRlclBsYWNlbWVudFNlcnZpY2UgPSBjb250YWluZXIgIk9yZGVyIFBsYWNlbWVudCBTZXJ2aWNlIiB7CiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiQWNjZXB0cyBvcmRlcnMiCiAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJTcHJpbmcgRWNvc3lzdGVtIgogICAgICAgICAgICAgICAgdGFncyAidGFnIgogICAgICAgICAgICAgICAgcGVyc3BlY3RpdmVzIHsKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIG9yZGVyUGxhY2VtZW50QVBJID0gY29tcG9uZW50ICJPcmRlciBQbGFjZW1lbnQgQVBJIiB7CiAgICAgICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNlcnZpY2UgQVBJIgogICAgICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlNwcmluZyBIQVRFT0FTIgogICAgICAgICAgICAgICAgICAgIHBlcnNwZWN0aXZlcyB7CiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgb3JkZXJQbGFjZW1lbnRTY2hlbWEgPSBjb21wb25lbnQgIk9yZGVyIFBsYWNlbWVudCBTY2hlbWEiIHsKICAgICAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiT3JkZXIgc3RhdGUiCiAgICAgICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUG9zdGdyZVNRTCIKICAgICAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGNvbXBvbmVudCAiT3JkZXIgUGxhY2VtZW50IFBlcnNpc3RlbmNlIiB7CiAgICAgICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIlBlcnNpc3QgU2VydmljZSBTdGF0ZSIKICAgICAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJTcHJpbmcgRGF0YSBKREJDIgogICAgICAgICAgICAgICAgICAgIHBlcnNwZWN0aXZlcyB7CiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgICAgIG9yZGVyUGxhY2VtZW50QVBJIC0+IHRoaXMgIm9yZGVyIGRhdGEiICJTcHJpbmcgRGF0YSBKREJDIiAic3luYy1vbmUtd2F5IiB7CiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgICAgIHRoaXMgLT4gb3JkZXJQbGFjZW1lbnRTY2hlbWEgIm9yZGVyIGRhdGEiICJTcHJpbmcgRGF0YSBKREJDIiAic3luYy1vbmUtd2F5IiB7CiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgICAgIHBheW1lbnRTZXJ2aWNlID0gY29udGFpbmVyICJQYXltZW50IFNlcnZpY2UiIHsKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJQcm9jZXNzIHBheW1lbnRzIgogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiU3ByaW5nIEVjb3N5c3RlbSIKICAgICAgICAgICAgICAgIHRhZ3MgInRhZyIKICAgICAgICAgICAgICAgIHBlcnNwZWN0aXZlcyB7CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBwYXltZW50QVBJID0gY29tcG9uZW50ICJQYXltZW50IEFQSSIgewogICAgICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJTZXJ2aWNlIEFQSSIKICAgICAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJTcHJpbmcgSEFURU9BUyIKICAgICAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIHBheW1lbnRTY2hlbWEgPSBjb21wb25lbnQgIlBheW1lbnQgU2NoZW1hIiB7CiAgICAgICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIlBheW1lbnQgc3RhdGUiCiAgICAgICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUG9zdGdyZVNRTCIKICAgICAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGNvbXBvbmVudCAiUGF5bWVudCBQZXJzaXN0ZW5jZSIgewogICAgICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJQZXJzaXN0IFNlcnZpY2UgU3RhdGUiCiAgICAgICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiU3ByaW5nIERhdGEgSkRCQyIKICAgICAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICBwYXltZW50QVBJIC0+IHRoaXMgInBheW1lbnQgZGF0YSIgIlNwcmluZyBEYXRhIEpEQkMiICJzeW5jLW9uZS13YXkiIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgdGhpcyAtPiBwYXltZW50U2NoZW1hICJwYXltZW50IGRhdGEiICJTcHJpbmcgRGF0YSBKREJDIiAic3luYy1vbmUtd2F5IiB7CiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgICAgIGZ1bGZpbGxtZW50U2VydmljZSA9IGNvbnRhaW5lciAiRnVsZmlsbG1lbnQgU2VydmljZSIgewogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNoaXBzIG9yZGVycyIKICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlNwcmluZyBFY29zeXN0ZW0iCiAgICAgICAgICAgICAgICB0YWdzICJ0YWciCiAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgZnVsZmlsbG1lbnRBUEkgPSBjb21wb25lbnQgIkZ1bGZpbGxtZW50IEFQSSIgewogICAgICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJTZXJ2aWNlIEFQSSIKICAgICAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJTcHJpbmcgSEFURU9BUyIKICAgICAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGZ1bGZpbGxtZW50U2NoZW1hID0gY29tcG9uZW50ICJGdWxmaWxsbWVudCBTY2hlbWEiIHsKICAgICAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiRnVsZmlsbG1lbnQgc3RhdGUiCiAgICAgICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUG9zdGdyZVNRTCIKICAgICAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGNvbXBvbmVudCAiRnVsZmlsbG1lbnQgUGVyc2lzdGVuY2UiIHsKICAgICAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiUGVyc2lzdCBTZXJ2aWNlIFN0YXRlIgogICAgICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlNwcmluZyBEYXRhIEpEQkMiCiAgICAgICAgICAgICAgICAgICAgcGVyc3BlY3RpdmVzIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgZnVsZmlsbG1lbnRBUEkgLT4gdGhpcyAiZnVsZmlsbG1lbnQgZGF0YSIgIlNwcmluZyBEYXRhIEpEQkMiICJzeW5jLW9uZS13YXkiIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgdGhpcyAtPiBmdWxmaWxsbWVudFNjaGVtYSAiZnVsZmlsbG1lbnQgZGF0YSIgIlNwcmluZyBEYXRhIEpEQkMiICJzeW5jLW9uZS13YXkiIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICAgICAgZW1haWxTZXJ2aWNlID0gY29udGFpbmVyICJFLW1haWwgU2VydmljZSIgewogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIkUtbWFpbCBjdXN0b21lcnMiCiAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJTcHJpbmcgRWNvc3lzdGVtIgogICAgICAgICAgICAgICAgdGFncyAidGFnIgogICAgICAgICAgICAgICAgcGVyc3BlY3RpdmVzIHsKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGVtYWlsQVBJID0gY29tcG9uZW50ICJFLU1haWwgQVBJIiB7CiAgICAgICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNlcnZpY2UgQVBJIgogICAgICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlNwcmluZyBIQVRFT0FTIgogICAgICAgICAgICAgICAgICAgIHBlcnNwZWN0aXZlcyB7CiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgZW1haWxTY2hlbWEgPSBjb21wb25lbnQgIkUtbWFpbCBTY2hlbWEiIHsKICAgICAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiRS1tYWlsIHN0YXRlIgogICAgICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlBvc3RncmVTUUwiCiAgICAgICAgICAgICAgICAgICAgcGVyc3BlY3RpdmVzIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBjb21wb25lbnQgIkUtTWFpbCBQZXJzaXN0ZW5jZSIgewogICAgICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJQZXJzaXN0IFNlcnZpY2UgU3RhdGUiCiAgICAgICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiU3ByaW5nIERhdGEgSkRCQyIKICAgICAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICBlbWFpbEFQSSAtPiB0aGlzICJlLW1haWwgZGF0YSIgIlNwcmluZyBEYXRhIEpEQkMiICJzeW5jLW9uZS13YXkiIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgdGhpcyAtPiBlbWFpbFNjaGVtYSAiZS1tYWlsIGRhdGEiICJTcHJpbmcgRGF0YSBKREJDIiAic3luYy1vbmUtd2F5IiB7CiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgICAgIG9yY2hlc3RyYXRvciA9IGNvbnRhaW5lciAiT3JjaGVzdHJhdG9yIiB7CiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiQ29vcmRpbmF0ZXMgdGhlIHdvcmtmbG93LCBtYWludGFpbnMgYXRvbWljIGNvbnNpc3RlbmN5IgogICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiU3ByaW5nIEVjb3N5c3RlbSIKICAgICAgICAgICAgICAgIHRhZ3MgInRhZyIKICAgICAgICAgICAgICAgIHBlcnNwZWN0aXZlcyB7CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBvcmNoZXN0cmF0b3JBUEkgPSBjb21wb25lbnQgIk9yY2hlc3RyYXRvciBBUEkiIHsKICAgICAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiU2VydmljZSBBUEkiCiAgICAgICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiU3ByaW5nIEhBVEVPQVMiCiAgICAgICAgICAgICAgICAgICAgcGVyc3BlY3RpdmVzIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgcGVubnkgLT4gdGhpcyAicHVyY2hhc2UgcHJvZHVjdHMiICJKU09OIG92ZXIgSFRUUFMiICJzeW5jLW9uZS13YXkiIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBzZXJ2aWNlR2F0ZXdheSA9IGNvbXBvbmVudCAiU2VydmljZSBHYXRld2F5IiB7CiAgICAgICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNlcnZpY2UgQ2xpZW50cyIKICAgICAgICAgICAgICAgICAgICB0ZWNobm9sb2d5ICJTcHJpbmcgSEFURU9BUyIKICAgICAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICBvcmNoZXN0cmF0b3JBUEkgLT4gdGhpcyAiZXhlY3V0ZSB3b3JrZmxvdyIgIkpTT04gb3ZlciBIVFRQUyIgInN5bmMtb25lLXdheSIgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICB0aGlzIC0+IG9yZGVyUGxhY2VtZW50QVBJICJhY2NlcHQgdGhlIG9yZGVyIiAiSlNPTiBvdmVyIEhUVFBTIiAic3luYy1vbmUtd2F5IiB7CiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgICAgIHRoaXMgLT4gcGF5bWVudEFQSSAicHJvY2VzcyB0aGUgcGF5bWVudCIgIkpTT04gb3ZlciBIVFRQUyIgInN5bmMtb25lLXdheSIgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICB0aGlzIC0+IGZ1bGZpbGxtZW50QVBJICJzaGlwIHRoZSBvcmRlciIgIkpTT04gb3ZlciBIVFRQUyIgInN5bmMtb25lLXdheSIgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICB0aGlzIC0+IGVtYWlsQVBJICJzZW5kIHRoZSBvcmRlciBzdGF0dXMiICJKU09OIG92ZXIgSFRUUFMiICJzeW5jLW9uZS13YXkiIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBvcmNoZXN0cmF0aW9uU2NoZW1hID0gY29tcG9uZW50ICJPcmNoZXN0cmF0aW9uIFNjaGVtYSIgewogICAgICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJPcmNoZXN0cmF0aW9uIHN0YXRlIgogICAgICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlBvc3RncmVTUUwiCiAgICAgICAgICAgICAgICAgICAgcGVyc3BlY3RpdmVzIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBjb21wb25lbnQgIk9yY2hlc3RyYXRvciBQZXJzaXN0ZW5jZSIgewogICAgICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJQZXJzaXN0IFNlcnZpY2UgU3RhdGUiCiAgICAgICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiU3ByaW5nIERhdGEgSkRCQyIKICAgICAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICBvcmNoZXN0cmF0b3JBUEkgLT4gdGhpcyAiZXhlY3V0ZSB3b3JrZmxvdyIgIkpTT04gb3ZlciBIVFRQUyIgInN5bmMtb25lLXdheSIgewogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICB0aGlzIC0+IG9yY2hlc3RyYXRpb25TY2hlbWEgIm9yY2hlc3RyYXRpb24gZGF0YSIgIlNwcmluZyBEYXRhIEpEQkMiICJzeW5jLW9uZS13YXkiIHsKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgIH0KICAgIH0KCiAgICAjIGh0dHBzOi8vdmlzbWUuY28vYmxvZy93ZWJzaXRlLWNvbG9yLXNjaGVtZXMvCiAgICB2aWV3cyB7CiAgICAgICAgdGhlbWUgZGVmYXVsdAogICAgICAgIHN0eWxlcyB7CiAgICAgICAgICAgIGVsZW1lbnQgIk1lc3NhZ2VCcm9rZXIiIHsKICAgICAgICAgICAgICAgIHNoYXBlIEN5bGluZGVyCiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNFOEE4N0MKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJEYXRhU3RvcmUiIHsKICAgICAgICAgICAgICAgIHNoYXBlIEN5bGluZGVyCiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNFMjdENjAKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJDcm9uIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBSb2JvdAogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkZpbGVTdG9yZSIgewogICAgICAgICAgICAgICAgc2hhcGUgRm9sZGVyCiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNkYWMyOTIKICAgICAgICAgICAgfQogICAgICAgICAgICAjIHNoYXBlIDxCb3h8Um91bmRlZEJveHxDaXJjbGV8RWxsaXBzZXxIZXhhZ29ufEN5bGluZGVyfFBpcGV8UGVyc29ufFJvYm90fEZvbGRlcnxXZWJCcm93c2VyfE1vYmlsZURldmljZVBvcnRyYWl0fE1vYmlsZURldmljZUxhbmRzY2FwZXxDb21wb25lbnQ+CiAgICAgICAgICAgIGVsZW1lbnQgIkNoYW5uZWwiIHsKICAgICAgICAgICAgICAgIHNoYXBlIFBpcGUKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgI0MzOEQ5RQogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkNoYW5uZWwgQWRhcHRlciIgewogICAgICAgICAgICAgICAgc2hhcGUgRWxsaXBzZQogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjNDFCM0EzCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiTWljcm9zZXJ2aWNlIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBIZXhhZ29uCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiQ29tbWFuZExpbmUiIHsKICAgICAgICAgICAgICAgIHNoYXBlIEJveAogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIldlYlVJIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBXZWJCcm93c2VyCiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiYXN5bmMtb25lLXdheSIgewogICAgICAgICAgICAgICAgdGhpY2tuZXNzIDIKICAgICAgICAgICAgICAgIHN0eWxlIGRvdHRlZAogICAgICAgICAgICAgICAgY29sb3IgIzI0MjU4MgogICAgICAgICAgICB9CiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAic3luYy1vbmUtd2F5IiB7CiAgICAgICAgICAgICAgICB0aGlja25lc3MgMgogICAgICAgICAgICAgICAgc3R5bGUgc29saWQKICAgICAgICAgICAgICAgIGNvbG9yICMwMDAwRkYKICAgICAgICAgICAgfQogICAgICAgICAgICByZWxhdGlvbnNoaXAgInN5bmMtdHdvLXdheSIgewogICAgICAgICAgICAgICAgdGhpY2tuZXNzIDIKICAgICAgICAgICAgICAgIHN0eWxlIHNvbGlkCiAgICAgICAgICAgICAgICBjb2xvciAjNTUzRDY3CiAgICAgICAgICAgIH0KICAgICAgICAgICAgcmVsYXRpb25zaGlwICJqc29uLW92ZXItbW9uZ29kYi13aXJlLXByb3RvY29sIiB7CiAgICAgICAgICAgICAgICB0aGlja25lc3MgMgogICAgICAgICAgICAgICAgc3R5bGUgZG90dGVkCiAgICAgICAgICAgICAgICBjb2xvciAjRjY0QzcyCiAgICAgICAgICAgIH0KICAgICAgICAgICAgcmVsYXRpb25zaGlwICJqZGJjLWRyaXZlciIgewogICAgICAgICAgICAgICAgdGhpY2tuZXNzIDIKICAgICAgICAgICAgICAgIHN0eWxlIGRvdHRlZAogICAgICAgICAgICAgICAgY29sb3IgI0Y2NEM3MgogICAgICAgICAgICB9CiAgICAgICAgfQovKgogICAgICAgICMgZnJvbSBtaXNjb25jZXB0aW9uIHRhbGsKICAgICAgICBjb250YWluZXIgYnV5bW9yZSB7CiAgICAgICAgICAgIGluY2x1ZGUgLT5kYXRhYmFzZS0+CiAgICAgICAgfQogICAgICAgIGNvbnRhaW5lciBidXltb3JlIHsKICAgICAgICAgICAgaW5jbHVkZSAtPm9yZGVyUGxhY2VtZW50U2VydmljZS0+CiAgICAgICAgfQogICAgICAgIGNvbnRhaW5lciBidXltb3JlIHsKICAgICAgICAgICAgaW5jbHVkZSAtPnBheW1lbnRTZXJ2aWNlLT4KICAgICAgICB9CiAgICAgICAgY29udGFpbmVyIGJ1eW1vcmUgewogICAgICAgICAgICBpbmNsdWRlIC0+ZnVsZmlsbG1lbnRTZXJ2aWNlLT4KICAgICAgICB9CiAgICAgICAgY29udGFpbmVyIGJ1eW1vcmUgewogICAgICAgICAgICBpbmNsdWRlIC0+ZW1haWxTZXJ2aWNlLT4KICAgICAgICB9CiAgICAgICAgY29udGFpbmVyIGJ1eW1vcmUgewogICAgICAgICAgICBpbmNsdWRlIC0+b3JjaGVzdHJhdG9yLT4KICAgICAgICB9CiAgICAgICBjb250YWluZXIgYnV5bW9yZSB7CiAgICAgICAgICAgaW5jbHVkZSBvcmRlclBsYWNlbWVudFNlcnZpY2UgZW1haWxTZXJ2aWNlCiAgICAgICB9CiovCiAgICB9Cn0="
+    "structurizr.dsl" : "IyBodHRwczovL2dpdGh1Yi5jb20vc3RydWN0dXJpenIvZHNsL2Jsb2IvbWFzdGVyL2RvY3MvbGFuZ3VhZ2UtcmVmZXJlbmNlLm1kCgojKFBlcnNvbnxTb2Z0d2FyZVN5c3RlbXxDb250YWluZXJ8Q29tcG9uZW50fERlcGxveW1lbnROb2RlfEluZnJhc3RydWN0dXJlTm9kZXxTb2Z0d2FyZVN5c3RlbUluc3RhbmNlfENvbnRhaW5lckluc3RhbmNlfEN1c3RvbSkKCiFjb25zdCBDT0RFX05BTUUgIlByb2plY3QgQWxwaGEiCiFjb25zdCBHUk9VUF9OQU1FICJHcm91cCIKCi8qCm11bHRpIGxpbmUKKi8KCiMgc2luZ2xlIGxpbmUKLy8gc2luZ2xlIGxpbmUKCndvcmtzcGFjZSAiQ2FuIEM0IEhhbmRsZSBMYXJnZSBEaWFncmFtcyIgewogICAgIWlkZW50aWZpZXJzIGZsYXQKICAgICFpbXBsaWVkUmVsYXRpb25zaGlwcyB0cnVlCiAgICMhaW5jbHVkZSA8ZmlsZXxkaXJlY3Rvcnl8dXJsPgoKICAgICFkb2NzIGRvY3VtZW50cwogICAgIWFkcnMgZGVjaXNpb25zCgogICAgIWNvbnN0IEZPTyAiU29tZSB0ZXh0IHlvdSB3YW50IHRvIHJldXNlLiIKCiAgICBtb2RlbCB7CiAgICAgICAgZ3JvdXAgIkJ1c2luZXNzIFVuaXQgQWxwaGEiIHsKICAgICAgICAgICAgc29mdHdhcmVTeXN0ZW0gIlhyYXkiIHsKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJTb21lIHN5c3RlbSIKICAgICAgICAgICAgICAgIHBlcnNwZWN0aXZlcyB7CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICAgICAgc29mdHdhcmVTeXN0ZW0gIldoaXNrZXkiIHsKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJTb21lIHN5c3RlbSIKICAgICAgICAgICAgICAgIHBlcnNwZWN0aXZlcyB7CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICAgICAgZ3JvdXAgIkJ1c2luZXNzIFVuaXQgQnJhdm8iIHsKICAgICAgICAgICAgc29mdHdhcmVTeXN0ZW0gIllhbmtlZSIgewogICAgICAgICAgICAgICAgZGVzY3JpcHRpb24gIlNvbWUgc3lzdGVtIgogICAgICAgICAgICAgICAgcGVyc3BlY3RpdmVzIHsKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgICAgICBzb2Z0d2FyZVN5c3RlbSAiVmljdG9yIiB7CiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiAiU29tZSBzeXN0ZW0iCiAgICAgICAgICAgICAgICBwZXJzcGVjdGl2ZXMgewogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgfQogICAgICAgIGdyb3VwICJCdXNpbmVzcyBVbml0IENoYXJsaWUiIHsKICAgICAgICAgICAgc29mdHdhcmVTeXN0ZW0gIlp1bHUiIHsKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJTb21lIHN5c3RlbSIKICAgICAgICAgICAgICAgIHBlcnNwZWN0aXZlcyB7CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICAgICAgc29mdHdhcmVTeXN0ZW0gIlVuaWZvcm0iIHsKICAgICAgICAgICAgICAgIGRlc2NyaXB0aW9uICJTb21lIHN5c3RlbSIKICAgICAgICAgICAgICAgIHBlcnNwZWN0aXZlcyB7CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9CgogICAgIyBodHRwczovL3Zpc21lLmNvL2Jsb2cvd2Vic2l0ZS1jb2xvci1zY2hlbWVzLwogICAgdmlld3MgewogICAgICAgIHRoZW1lIGRlZmF1bHQKICAgICAgICBzdHlsZXMgewogICAgICAgICAgICBlbGVtZW50ICJNZXNzYWdlQnJva2VyIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBDeWxpbmRlcgogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjRThBODdDCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiRGF0YVN0b3JlIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBDeWxpbmRlcgogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjRTI3RDYwCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiQ3JvbiIgewogICAgICAgICAgICAgICAgc2hhcGUgUm9ib3QKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJGaWxlU3RvcmUiIHsKICAgICAgICAgICAgICAgIHNoYXBlIEZvbGRlcgogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjZGFjMjkyCiAgICAgICAgICAgIH0KICAgICAgICAgICAgIyBzaGFwZSA8Qm94fFJvdW5kZWRCb3h8Q2lyY2xlfEVsbGlwc2V8SGV4YWdvbnxDeWxpbmRlcnxQaXBlfFBlcnNvbnxSb2JvdHxGb2xkZXJ8V2ViQnJvd3NlcnxNb2JpbGVEZXZpY2VQb3J0cmFpdHxNb2JpbGVEZXZpY2VMYW5kc2NhcGV8Q29tcG9uZW50PgogICAgICAgICAgICBlbGVtZW50ICJDaGFubmVsIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBQaXBlCiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNDMzhEOUUKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJDaGFubmVsIEFkYXB0ZXIiIHsKICAgICAgICAgICAgICAgIHNoYXBlIEVsbGlwc2UKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzQxQjNBMwogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIk1pY3Jvc2VydmljZSIgewogICAgICAgICAgICAgICAgc2hhcGUgSGV4YWdvbgogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkNvbW1hbmRMaW5lIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBCb3gKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJXZWJVSSIgewogICAgICAgICAgICAgICAgc2hhcGUgV2ViQnJvd3NlcgogICAgICAgICAgICB9CgogICAgICAgICAgICByZWxhdGlvbnNoaXAgImFzeW5jLW9uZS13YXkiIHsKICAgICAgICAgICAgICAgIHRoaWNrbmVzcyAyCiAgICAgICAgICAgICAgICBzdHlsZSBkb3R0ZWQKICAgICAgICAgICAgICAgIGNvbG9yICMyNDI1ODIKICAgICAgICAgICAgfQogICAgICAgICAgICByZWxhdGlvbnNoaXAgInN5bmMtb25lLXdheSIgewogICAgICAgICAgICAgICAgdGhpY2tuZXNzIDIKICAgICAgICAgICAgICAgIHN0eWxlIHNvbGlkCiAgICAgICAgICAgICAgICBjb2xvciAjMDAwMEZGCiAgICAgICAgICAgIH0KICAgICAgICAgICAgcmVsYXRpb25zaGlwICJzeW5jLXR3by13YXkiIHsKICAgICAgICAgICAgICAgIHRoaWNrbmVzcyAyCiAgICAgICAgICAgICAgICBzdHlsZSBzb2xpZAogICAgICAgICAgICAgICAgY29sb3IgIzU1M0Q2NwogICAgICAgICAgICB9CiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAianNvbi1vdmVyLW1vbmdvZGItd2lyZS1wcm90b2NvbCIgewogICAgICAgICAgICAgICAgdGhpY2tuZXNzIDIKICAgICAgICAgICAgICAgIHN0eWxlIGRvdHRlZAogICAgICAgICAgICAgICAgY29sb3IgI0Y2NEM3MgogICAgICAgICAgICB9CiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiamRiYy1kcml2ZXIiIHsKICAgICAgICAgICAgICAgIHRoaWNrbmVzcyAyCiAgICAgICAgICAgICAgICBzdHlsZSBkb3R0ZWQKICAgICAgICAgICAgICAgIGNvbG9yICNGNjRDNzIKICAgICAgICAgICAgfQogICAgICAgIH0KLyoKICAgICAgICAjIGZyb20gbWlzY29uY2VwdGlvbiB0YWxrCiAgICAgICAgY29udGFpbmVyIGJ1eW1vcmUgewogICAgICAgICAgICBpbmNsdWRlIC0+ZGF0YWJhc2UtPgogICAgICAgIH0KICAgICAgICBjb250YWluZXIgYnV5bW9yZSB7CiAgICAgICAgICAgIGluY2x1ZGUgLT5vcmRlclBsYWNlbWVudFNlcnZpY2UtPgogICAgICAgIH0KICAgICAgICBjb250YWluZXIgYnV5bW9yZSB7CiAgICAgICAgICAgIGluY2x1ZGUgLT5wYXltZW50U2VydmljZS0+CiAgICAgICAgfQogICAgICAgIGNvbnRhaW5lciBidXltb3JlIHsKICAgICAgICAgICAgaW5jbHVkZSAtPmZ1bGZpbGxtZW50U2VydmljZS0+CiAgICAgICAgfQogICAgICAgIGNvbnRhaW5lciBidXltb3JlIHsKICAgICAgICAgICAgaW5jbHVkZSAtPmVtYWlsU2VydmljZS0+CiAgICAgICAgfQogICAgICAgIGNvbnRhaW5lciBidXltb3JlIHsKICAgICAgICAgICAgaW5jbHVkZSAtPm9yY2hlc3RyYXRvci0+CiAgICAgICAgfQogICAgICAgY29udGFpbmVyIGJ1eW1vcmUgewogICAgICAgICAgIGluY2x1ZGUgb3JkZXJQbGFjZW1lbnRTZXJ2aWNlIGVtYWlsU2VydmljZQogICAgICAgfQoqLwogICAgfQp9"
   },
   "views" : {
-    "componentViews" : [ {
-      "automaticLayout" : {
-        "applied" : false,
-        "edgeSeparation" : 0,
-        "implementation" : "Graphviz",
-        "nodeSeparation" : 300,
-        "rankDirection" : "TopBottom",
-        "rankSeparation" : 300,
-        "vertices" : false
-      },
-      "containerId" : "22",
-      "elements" : [ {
-        "id" : "23",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "24",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "25",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "28",
-        "x" : 0,
-        "y" : 0
-      } ],
-      "externalContainerBoundariesVisible" : false,
-      "generatedKey" : true,
-      "key" : "Component-001",
-      "order" : 5,
-      "relationships" : [ {
-        "id" : "26"
-      }, {
-        "id" : "27"
-      }, {
-        "id" : "49"
-      } ]
-    }, {
-      "automaticLayout" : {
-        "applied" : false,
-        "edgeSeparation" : 0,
-        "implementation" : "Graphviz",
-        "nodeSeparation" : 300,
-        "rankDirection" : "TopBottom",
-        "rankSeparation" : 300,
-        "vertices" : false
-      },
-      "containerId" : "16",
-      "elements" : [ {
-        "id" : "17",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "18",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "19",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "28",
-        "x" : 0,
-        "y" : 0
-      } ],
-      "externalContainerBoundariesVisible" : false,
-      "generatedKey" : true,
-      "key" : "Component-002",
-      "order" : 6,
-      "relationships" : [ {
-        "id" : "20"
-      }, {
-        "id" : "21"
-      }, {
-        "id" : "45"
-      } ]
-    }, {
-      "automaticLayout" : {
-        "applied" : false,
-        "edgeSeparation" : 0,
-        "implementation" : "Graphviz",
-        "nodeSeparation" : 300,
-        "rankDirection" : "TopBottom",
-        "rankSeparation" : 300,
-        "vertices" : false
-      },
-      "containerId" : "28",
-      "elements" : [ {
-        "id" : "1",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "4",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "10",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "16",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "22",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "29",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "33",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "51",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "52",
-        "x" : 0,
-        "y" : 0
-      } ],
-      "externalContainerBoundariesVisible" : false,
-      "generatedKey" : true,
-      "key" : "Component-003",
-      "order" : 7,
-      "relationships" : [ {
-        "id" : "30"
-      }, {
-        "id" : "34"
-      }, {
-        "id" : "36"
-      }, {
-        "id" : "40"
-      }, {
-        "id" : "44"
-      }, {
-        "id" : "48"
-      }, {
-        "id" : "53"
-      }, {
-        "id" : "54"
-      } ]
-    }, {
-      "automaticLayout" : {
-        "applied" : false,
-        "edgeSeparation" : 0,
-        "implementation" : "Graphviz",
-        "nodeSeparation" : 300,
-        "rankDirection" : "TopBottom",
-        "rankSeparation" : 300,
-        "vertices" : false
-      },
-      "containerId" : "4",
-      "elements" : [ {
-        "id" : "5",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "6",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "7",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "28",
-        "x" : 0,
-        "y" : 0
-      } ],
-      "externalContainerBoundariesVisible" : false,
-      "generatedKey" : true,
-      "key" : "Component-004",
-      "order" : 8,
-      "relationships" : [ {
-        "id" : "37"
-      }, {
-        "id" : "8"
-      }, {
-        "id" : "9"
-      } ]
-    }, {
-      "automaticLayout" : {
-        "applied" : false,
-        "edgeSeparation" : 0,
-        "implementation" : "Graphviz",
-        "nodeSeparation" : 300,
-        "rankDirection" : "TopBottom",
-        "rankSeparation" : 300,
-        "vertices" : false
-      },
-      "containerId" : "10",
-      "elements" : [ {
-        "id" : "11",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "12",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "13",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "28",
-        "x" : 0,
-        "y" : 0
-      } ],
-      "externalContainerBoundariesVisible" : false,
-      "generatedKey" : true,
-      "key" : "Component-005",
-      "order" : 9,
-      "relationships" : [ {
-        "id" : "14"
-      }, {
-        "id" : "15"
-      }, {
-        "id" : "41"
-      } ]
-    } ],
     "configuration" : {
       "branding" : { },
-      "lastSavedView" : "Component-003",
+      "lastSavedView" : "SystemLandscape-001",
+      "metadataSymbols" : "SquareBrackets",
       "styles" : {
         "elements" : [ {
           "background" : "#e8a87c",
@@ -903,58 +276,6 @@
       "terminology" : { },
       "themes" : [ "https://static.structurizr.com/themes/default/theme.json" ]
     },
-    "containerViews" : [ {
-      "automaticLayout" : {
-        "applied" : false,
-        "edgeSeparation" : 0,
-        "implementation" : "Graphviz",
-        "nodeSeparation" : 300,
-        "rankDirection" : "TopBottom",
-        "rankSeparation" : 300,
-        "vertices" : false
-      },
-      "elements" : [ {
-        "id" : "1",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "4",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "10",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "16",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "22",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "28",
-        "x" : 0,
-        "y" : 0
-      } ],
-      "externalSoftwareSystemBoundariesVisible" : false,
-      "generatedKey" : true,
-      "key" : "Container-001",
-      "order" : 4,
-      "relationships" : [ {
-        "id" : "31"
-      }, {
-        "id" : "38"
-      }, {
-        "id" : "42"
-      }, {
-        "id" : "46"
-      }, {
-        "id" : "50"
-      } ],
-      "softwareSystemId" : "3"
-    } ],
     "systemContextViews" : [ {
       "automaticLayout" : {
         "applied" : false,
@@ -966,7 +287,7 @@
         "vertices" : false
       },
       "elements" : [ {
-        "id" : "2",
+        "id" : "6",
         "x" : 0,
         "y" : 0
       } ],
@@ -974,7 +295,7 @@
       "generatedKey" : true,
       "key" : "SystemContext-001",
       "order" : 2,
-      "softwareSystemId" : "2"
+      "softwareSystemId" : "6"
     }, {
       "automaticLayout" : {
         "applied" : false,
@@ -986,11 +307,7 @@
         "vertices" : false
       },
       "elements" : [ {
-        "id" : "1",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "3",
+        "id" : "4",
         "x" : 0,
         "y" : 0
       } ],
@@ -998,12 +315,8 @@
       "generatedKey" : true,
       "key" : "SystemContext-002",
       "order" : 3,
-      "relationships" : [ {
-        "id" : "32"
-      } ],
-      "softwareSystemId" : "3"
-    } ],
-    "systemLandscapeViews" : [ {
+      "softwareSystemId" : "4"
+    }, {
       "automaticLayout" : {
         "applied" : false,
         "edgeSeparation" : 0,
@@ -1014,25 +327,123 @@
         "vertices" : false
       },
       "elements" : [ {
-        "id" : "1",
-        "x" : 0,
-        "y" : 0
-      }, {
         "id" : "2",
         "x" : 0,
         "y" : 0
-      }, {
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "generatedKey" : true,
+      "key" : "SystemContext-003",
+      "order" : 4,
+      "softwareSystemId" : "2"
+    }, {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "dimensions" : {
+        "height" : 794,
+        "width" : 890
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 220,
+        "y" : 185
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "generatedKey" : true,
+      "key" : "SystemContext-004",
+      "order" : 5,
+      "softwareSystemId" : "1"
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "elements" : [ {
         "id" : "3",
         "x" : 0,
         "y" : 0
       } ],
       "enterpriseBoundaryVisible" : true,
       "generatedKey" : true,
+      "key" : "SystemContext-005",
+      "order" : 6,
+      "softwareSystemId" : "3"
+    }, {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "elements" : [ {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "generatedKey" : true,
+      "key" : "SystemContext-006",
+      "order" : 7,
+      "softwareSystemId" : "5"
+    } ],
+    "systemLandscapeViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "TopBottom",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "dimensions" : {
+        "height" : 794,
+        "width" : 4640
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 969,
+        "y" : 185
+      }, {
+        "id" : "2",
+        "x" : 219,
+        "y" : 185
+      }, {
+        "id" : "3",
+        "x" : 2469,
+        "y" : 185
+      }, {
+        "id" : "4",
+        "x" : 1719,
+        "y" : 185
+      }, {
+        "id" : "5",
+        "x" : 3969,
+        "y" : 185
+      }, {
+        "id" : "6",
+        "x" : 3219,
+        "y" : 185
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "generatedKey" : true,
       "key" : "SystemLandscape-001",
-      "order" : 1,
-      "relationships" : [ {
-        "id" : "32"
-      } ]
+      "order" : 1
     } ]
   }
 }
