@@ -4,8 +4,8 @@ workspace alpha-system "Describe a single software system" {
     }
 
     !identifiers flat
-    !docs documents
-    !adrs decisions
+    !docs documents/workspace
+    !adrs decisions/workspace
 
     model {
         group "Alpha Team" {
@@ -24,8 +24,8 @@ workspace alpha-system "Describe a single software system" {
             }
         }
         softwareSystem "Alpha" "System being diagrammed" "alpha-tag" {
-            # !docs
-            # !adrs
+            !docs documents/alpha
+            !adrs decisions/alpha
             # group
             # container
             description "Does this override the description?"
@@ -33,7 +33,7 @@ workspace alpha-system "Describe a single software system" {
             # url
             # properties
             # perspectives
-            adam -> this "Administers" "JSON over HTTPS" "synchronous"
+            adam -> this "Manages the system" "Chrome browser" "synchronous"
         }
         deploymentEnvironment k8s {
             # group
@@ -44,14 +44,14 @@ workspace alpha-system "Describe a single software system" {
     }
 
     views {
-        systemLandscape Alpha "High level view" {
+        systemLandscape system-landscape {
             include *
             # exclude
             # autoLayout tb 300 300
             default
             # animation
-            title "some title"
-            description "does this override the view description?"
+            title "High level interactions"
+            description "Highest view of the system and its collaborators"
             # properties
         }
 
