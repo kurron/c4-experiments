@@ -35,5 +35,5 @@ build/
 ### don't add the skeleton module
 skeleton/
 
- .structurizr/
+/.structurizr/
 *.log
