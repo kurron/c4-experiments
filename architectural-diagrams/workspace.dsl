@@ -1,46 +1,16 @@
-workspace alpha-system "Describe a single software system" {
+
+
+workspace all-systems "Describe multiple software systems" {
     properties {
         name "value"
     }
 
     !identifiers flat
-    !docs documents/workspace
-    !adrs decisions/workspace
 
     model {
-        group "Alpha Team" {
-
-        }
-        group "Bravo Team" {
-
-        }
-        adam = person Administrator "Manages the system" "admin-tag" {
-            url https://www.grc.com/
-            properties {
-                some-name "some value"
-            }
-            perspectives {
-                ownership "Which team owns the object" team-alpha
-            }
-        }
-        softwareSystem "Alpha" "System being diagrammed" "alpha-tag" {
-            !docs documents/alpha
-            !adrs decisions/alpha
-            # group
-            # container
-            description "Does this override the description?"
-            # tags
-            # url
-            # properties
-            # perspectives
-            adam -> this "Manages the system" "Chrome browser" "synchronous"
-        }
-        deploymentEnvironment k8s {
-            # group
-            # deploymentGroup
-            # deploymentNode
-        }
-        # element
+        #!include <file|directory|url>
+        !include alpha/objects.dsl
+        !include bravo/objects.dsl
     }
 
     views {
@@ -72,6 +42,7 @@ workspace alpha-system "Describe a single software system" {
     }
 
     configuration {
-        scope SoftwareSystem
+        # scope <landscape|softwaresystem|none>
+        scope None
     }
 }
