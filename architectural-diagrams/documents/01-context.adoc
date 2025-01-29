@@ -1,4 +1,4 @@
 == Context
-BuyMore online is an ecommerce site, selling mostly widgets. The workflow is typical of other sites where, after the purchase is fulfilled, an e-mail notification is sent to the customer. It is very important that any service failures during the workflow get reverted as quickly as possible. We don't want an angry customer because we charged her for something that never shipped!
+Explain the collection of systems and major interactions and flows.
 
 WARNING: figure out how to embed the context diagram
