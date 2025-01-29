@@ -37,3 +37,4 @@ skeleton/
 
 /.structurizr/
 *.log
+architectural-diagrams/**/workspace.json
