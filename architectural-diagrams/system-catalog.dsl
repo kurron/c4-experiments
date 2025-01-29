@@ -4,12 +4,19 @@ workspace system-catalog "Collection of all actors and systems, but no details" 
     !identifiers hierarchical
 
     model {
+        group "Montreal" {
+            webSite = softwareSystem "Web Site"
+            orchestrator = softwareSystem "Orchestrator"
+        }
+
         group "Boston" {
-            alpha = softwareSystem "Alpha"
+            orderPlacement = softwareSystem "Order Placement"
+            payment = softwareSystem "Payment"
         }
 
         group "Los Angeles" {
-            b = softwareSystem "B"
+            fulfillment = softwareSystem "Fulfillment"
+            email = softwareSystem "email"
         }
     }
 

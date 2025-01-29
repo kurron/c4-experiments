@@ -1,6 +1,6 @@
 # 1. Record architecture decisions
 
-From the alpha folder
+From the boston folder
 
 ## Status
 Accepted
