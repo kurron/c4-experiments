@@ -1,2 +1,0 @@
-== Model Context
-This is coming from the bravo directory
